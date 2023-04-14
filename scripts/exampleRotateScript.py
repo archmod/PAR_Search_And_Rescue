@@ -8,12 +8,12 @@ def drive():
     # Drive publisher
     pub_drive = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
     cmd = Twist()
-    cmd.linear.x = 0
+    cmd.linear.x = 0.1
     cmd.linear.y = 0
     cmd.linear.z = 0
     cmd.angular.x = 0
     cmd.angular.y = 0
-    cmd.angular.z = 0
+    cmd.angular.z = 1.0
 
     # Paramaters
     speed = rospy.get_param("~speed", 0.5)
@@ -33,12 +33,12 @@ def drive():
         # Check time
         t_now = rospy.Time.now()
         if t_now - t_start > rospy.Duration(max_duration):
-        	stop = True
-
+            stop = True
 
     # Ensure a stop command is sent
     rospy.loginfo("Rotating finished - stopping robot")
     cmd.angular.z = 0
+    cmd.linear.x = 0
     pub_drive.publish(cmd)
 
 # Short ROS Node method

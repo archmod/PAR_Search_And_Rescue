@@ -13,6 +13,8 @@ def callback(msg):
             highest_confidence = confidence
             highest_id = object_id
     print("Highest confidence object ID:", highest_id, " Confidence:", highest_confidence)
+    if highest_id == 10:
+        print("START SIGN FOUND")
 
 
 
