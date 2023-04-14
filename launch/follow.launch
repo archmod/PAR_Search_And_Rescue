@@ -1,0 +1,9 @@
+<launch>
+
+    <node name="follow" pkg="follow" type="follower.py" output="screen" >
+        <param name="speed" value="0.5" />
+        <param name="turnRate" value="0.9" />
+        <param name="minWallDistance" value="0.5" />
+    </node>
+
+</launch>
