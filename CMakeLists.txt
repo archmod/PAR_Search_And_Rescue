@@ -166,6 +166,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/exampleRotateScript.py
   scripts/follower.py
+  scripts/follower2.py
   scripts/testRotateScript.py
   scripts/recognise.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
