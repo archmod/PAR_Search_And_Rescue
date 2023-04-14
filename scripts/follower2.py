@@ -41,9 +41,9 @@ class Follower:
         ranges = list(msg.ranges)
         self.regions = {
             "front": ranges[0 : scans_per_region - 1] + ranges[scans_per_region * 7 : -1],
-            "right": ranges[scans_per_region: scans_per_region * 3 - 1],
+            "left": ranges[scans_per_region: scans_per_region * 3 - 1],
             "back": ranges[scans_per_region * 3 : scans_per_region * 5 - 1],
-            "left": ranges[scans_per_region * 5 : scans_per_region * 7 - 1]
+            "right": ranges[scans_per_region * 5 : scans_per_region * 7 - 1]
         }
 
         self.select_action()
@@ -59,6 +59,7 @@ class Follower:
             pass
         # print(self.regions["right"])
         closestRight = min(min(self.regions["right"]), 15)
+        print(closestRight)
         if min(self.regions['front']) < self.threshold_max:
             self.turn_left()
         elif closestRight > self.threshold_min and closestRight < self.threshold_max:
@@ -83,7 +84,7 @@ class Follower:
     
     def find_wall(self):
         print("find wall")
-        self.make_move(0.1, -0.2)
+        self.make_move(0.1, -0.4)
 
     def turn_left(self):
         print("turn left")
