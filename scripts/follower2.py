@@ -17,10 +17,10 @@ class Follower:
         rospy.init_node('follower')
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
         rospy.Subscriber('/scan', LaserScan, self.process_scan)
-        self.threshold_min = rospy.get_param("~threshold_min", 0.15)
-        self.threshold_max = rospy.get_param("~threshold_max", 0.3)
+        self.threshold_min = rospy.get_param("~threshold_min", 0.3)
+        self.threshold_max = rospy.get_param("~threshold_max", 0.5)
         #defaults to rosbot 1 unit on the grid
-        self.minWallDist = rospy.get_param("~minWallDistance", 0.5)
+        self.minWallDist = rospy.get_param("~minWallDistance", 0.3)
         self.bot_state = Bot_state.IDLE
         self.actions = {
             Bot_state.IDLE: self.do_nothing,
@@ -84,7 +84,7 @@ class Follower:
     
     def find_wall(self):
         print("find wall")
-        self.make_move(0.1, -0.4)
+        self.make_move(0.1, -0.3)
 
     def turn_left(self):
         print("turn left")
