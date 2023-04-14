@@ -1,0 +1,16 @@
+<launch>
+    <arg name="teach" default="false"/>
+    <arg name="recognize" default="true"/>
+
+    <arg if="$(arg recognize)" name="chosen_world" value="rosbot_world_recognition"/>
+
+    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
+        <remap from="image" to="/camera/rgb/image_raw"/>
+        <!-- <param name="gui" value="$(arg teach)"/> -->
+        <param name="gui" value="true"/>
+        <param if="$(arg recognize)" name="objects_path" value="$(find par_search_and_rescue)/image_rec/"/>
+    </node>
+
+    <node if="$(arg recognize)" name="recognise" pkg="par_search_and_rescue" type="recognise.py" output="screen"/>
+
+</launch>

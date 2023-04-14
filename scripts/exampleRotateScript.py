@@ -35,6 +35,7 @@ def drive():
         if t_now - t_start > rospy.Duration(max_duration):
         	stop = True
 
+
     # Ensure a stop command is sent
     rospy.loginfo("Rotating finished - stopping robot")
     cmd.angular.z = 0
