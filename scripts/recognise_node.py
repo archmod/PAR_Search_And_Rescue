@@ -1,7 +1,8 @@
 import rospy
 from find_object_2d.msg import ObjectsStamped
 from std_msgs.msg import Bool
-from par_search_and_rescue.msg import HazardMarker
+from std_msgs.msg import Int32
+# from par_search_and_rescue.msg import HazardMarker
 from geometry_msgs.msg import PoseStamped
 from enum import Enum
 
@@ -26,7 +27,9 @@ class HazardDetection:
         print("IM RUNNING BOSS")
         rospy.init_node('hazard_detection_node', anonymous=True)
         rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
-        self.hazard_detected_pub = rospy.Publisher('/hazard_markers_detected', HazardMarker, queue_size=1)
+        # self.hazard_detected_pub = rospy.Publisher('/hazard_markers_detected', HazardMarker, queue_size=1)
+        self.hazard_detected_pub = rospy.Publisher('/hazard_markers_detected', Int32, queue_size=1)
+
         rospy.spin()
 
     def callback(self, msg):
@@ -42,12 +45,11 @@ class HazardDetection:
             
             # Publish hazard marker data only if the confidence is above a certain threshold
             if confidence > 0.5 and object_id != Recognition_Image.START.value:
-                hazard_marker = HazardMarker()
-                hazard_marker.id = object_id
-                hazard_marker.x = x
-                hazard_marker.y = y
-                self.hazard_detected_pub.publish(hazard_marker)
+                hazard_marker_id = Int32()
+                hazard_marker_id.data = object_id
+                self.hazard_detected_pub.publish(hazard_marker_id)
                 print(f"Published hazard marker {recognized_image.name} (ID: {object_id}) at (x, y): {x}, {y}")
+
 
 if __name__ == '__main__':
     try:
