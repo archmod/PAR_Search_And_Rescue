@@ -45,13 +45,15 @@ class Recognise:
         # Considers If No Sign is Found
         if highest_id != -1:
             # Print the Sign Name found to have the Highest Confidence
-            print(signage_id[highest_id])
-            self.image_detected_pub.publish(Bool(data=True))
+            rospy.logInfo(signage_id[highest_id])
 
-        if highest_id == 13:
-            self.startPosition()
+            # Commented as Causes Stop in Logging Messages
+            # self.image_detected_pub.publish(Bool(data=True))
 
-    def startPosition():
+            if highest_id == 13:
+                self.startPosition()
+
+    def startPosition(self):
         print("Start sign found")
 
 if __name__ == '__main__':
