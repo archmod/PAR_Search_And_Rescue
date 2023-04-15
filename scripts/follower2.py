@@ -35,6 +35,8 @@ class Follower:
             "right": []
         }
 
+        self.start_image_detected = False
+
     def process_scan(self, msg):
         num_scans = len(msg.ranges)
         scans_per_region = num_scans // 8

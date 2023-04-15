@@ -1,5 +1,6 @@
 import rospy
 from find_object_2d.msg import ObjectsStamped
+from std_msgs.msg import Bool
 
 signage_id = {
     # 'Unknown' Included in the Assignment Specs - Potential New Sign shown on Day?
@@ -19,34 +20,43 @@ signage_id = {
     13: 'Start'
 }
 
-def callback(msg):    
-    # Iterate through the objects in the message
-    highest_confidence = 0
-    highest_id = -1
-    confidence = 0
+class Recognise:
+    def __init__(self):
+        print("IM RUNNING BOSS")
+        rospy.init_node('object_recognition_listener', anonymous=True)
+        rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
+        self.image_detected_pub = rospy.Publisher('/image_detected', Bool, queue_size=1)
+        rospy.spin()
 
-    for i in range(0, len(msg.objects.data), 12):
-        object_id = int(msg.objects.data[i])
-        confidence = msg.objects.data[i + 1]
-        print("Recognized object ID:", object_id, "Confidence:", confidence)
-        if confidence > highest_confidence:
-            highest_confidence = confidence
-            highest_id = object_id
-    print("Highest confidence object ID:", highest_id, " Confidence:", highest_confidence)
+    def callback(self, msg):
+        # Iterate through the objects in the message
+        highest_confidence = 0
+        highest_id = -1
 
-    # Considers If No Sign is Found
-    if highest_id != -1:
-        # Print the Sign Name found to have the Highest Confidence
-        print(signage_id[highest_id])
+        for i in range(0, len(msg.objects.data), 12):
+            object_id = int(msg.objects.data[i])
+            confidence = msg.objects.data[i + 1]
+            print("Recognized object ID:", object_id, "Confidence:", confidence)
+            if confidence > highest_confidence:
+                highest_confidence = confidence
+                highest_id = object_id
+        print("Highest confidence object ID:", highest_id, " Confidence:", highest_confidence)
 
-    # Adds delay to the program
-    # rospy.sleep(2)    
+        # Considers If No Sign is Found
+        if highest_id != -1:
+            # Print the Sign Name found to have the Highest Confidence
+            print(signage_id[highest_id])
+            self.image_detected_pub.publish(Bool(data=True))
 
-def main():
-    print("IM RUNNING FUCKER")
-    rospy.init_node('object_recognition_listener', anonymous=True)
-    rospy.Subscriber('/objectsStamped', ObjectsStamped, callback)
-    rospy.spin()
+        if highest_id == 13:
+            self.startPosition()
+
+    def startPosition():
+        print("Start sign found")
 
 if __name__ == '__main__':
-    main()
+    try:
+        recogniser = Recognise()
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        pass
