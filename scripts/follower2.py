@@ -5,6 +5,8 @@ from geometry_msgs.msg import Twist
 from math import pi
 from enum import Enum
 
+printLogs = False
+
 class Bot_state(Enum):
     IDLE = 0
     FIND_WALL = 1
@@ -57,11 +59,13 @@ class Follower:
 
     def select_action(self):
         if not self.regions['right']:
-            print("passing")
+            if printLogs:
+                print("passing")
             pass
         # print(self.regions["right"])
         closestRight = min(min(self.regions["right"]), 15)
-        print(closestRight)
+        if printLogs:
+            print(closestRight)
         if min(self.regions['front']) < self.threshold_max:
             self.turn_left()
         elif closestRight > self.threshold_min and closestRight < self.threshold_max:
@@ -85,19 +89,23 @@ class Follower:
         pass
     
     def find_wall(self):
-        print("find wall")
+        if printLogs:
+            print("find wall")
         self.make_move(0.1, -0.3)
 
     def turn_left(self):
-        print("turn left")
+        if printLogs:
+            print("turn left")
         self.make_move(0, 0.3)
 
     def turn_right(self):
-        print("turn right")
+        if printLogs:
+            print("turn right")
         self.make_move(0, -0.3)
     
     def follow_wall(self):
-        print("follow wall")
+        if printLogs:
+            print("follow wall")
         self.make_move(0.1, 0)
     
     def make_move(self, linear, angular):
@@ -105,9 +113,6 @@ class Follower:
         msg.linear.x = linear
         msg.angular.z = angular
         self.pub.publish(msg)
-
-        
-
 
 if __name__ == '__main__':
     try:
