@@ -26,6 +26,7 @@ class Recognise:
         rospy.init_node('object_recognition_listener', anonymous=True)
         rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
         self.image_detected_pub = rospy.Publisher('/image_detected', Bool, queue_size=1)
+        self.start_image_pub = rospy.Publisher('/start_image', Bool, queue_size=1)
         rospy.spin()
 
     def callback(self, msg):
@@ -45,7 +46,7 @@ class Recognise:
         # Considers If No Sign is Found
         if highest_id != -1:
             # Print the Sign Name found to have the Highest Confidence
-            rospy.logInfo(signage_id[highest_id])
+            rospy.loginfo(signage_id[highest_id])
 
             # Commented as Causes Stop in Logging Messages
             # self.image_detected_pub.publish(Bool(data=True))
@@ -55,6 +56,7 @@ class Recognise:
 
     def startPosition(self):
         print("Start sign found")
+        self.start_image_pub.publish(Bool(data=True))
 
 if __name__ == '__main__':
     try:
