@@ -1,0 +1,9 @@
+<launch>
+    <node name="wall_follow" pkg="par_search_and_rescue" type="follower2.py" output="screen" >
+        <param name="threshold_min" value="0.15" />
+        <param name="threshold_max" value="0.3" />
+        <param name="minWallDistance" value="0.5" />
+    </node>
+
+    <include file="$(find par_search_and_rescue)/launch/find_object.launch" />
+</launch>
