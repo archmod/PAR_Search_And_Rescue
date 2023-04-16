@@ -25,6 +25,8 @@ class Recognition_Image(Enum):
     CORROSIVE = 12
     START = 99
 
+CONFIDENCE_THRESHOLD = 0.5
+
 class HazardDetection:
     def __init__(self):
         print("IM RUNNING BOSS")
@@ -57,6 +59,7 @@ class HazardDetection:
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.logerr("Failed to transform object position to map frame")
             return None, None, None
+        
     def callback(self, msg):
         if self.lidar_scan is None:
             return
@@ -74,7 +77,8 @@ class HazardDetection:
                 startMessage.data = 1
                 self.start_marker_pub.publish(startMessage)
                 print("Start Marker Found")
-            elif confidence > 0.5 and object_id != Recognition_Image.START.value:
+                
+            elif confidence > CONFIDENCE_THRESHOLD and object_id != Recognition_Image.START.value:
                 
                 # Get the angle corresponding to the detected object's image_x coordinate
                 angle_increment = self.lidar_scan.angle_increment

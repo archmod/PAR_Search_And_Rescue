@@ -1,6 +1,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import Marker
+from nav_msgs.msg import Path
 import tf
 import json
 
@@ -9,13 +10,16 @@ class Location:
         rospy.init_node('robot_location_getter')
         self.robot_pose = PoseStamped()
         self.listener = tf.TransformListener()
+        self.all_recorded_poses = []
+
+        self.path_pub = rospy.Publisher('path_taken', Path, queue_size=10)
         self.marker_pub = rospy.Publisher('/travelled_marker', Marker, queue_size=1)
         self.start_marker_pub = rospy.Publisher('/start_travelled_marker', Marker, queue_size=1)
         self.start_marker_is_not_set = True
+        rospy.sleep(1) # Important ! Allows Detection of True Values
         self.pose_publisher()
 
     def pose_publisher(self):
-        rospy.sleep(1) # Important ! Allows Detection of True Values
 
         while not rospy.is_shutdown():
             try:
@@ -34,7 +38,7 @@ class Location:
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 pass
 
-            # Convert PoseStamped message to JSON string
+            # For Logging Purposes Only
             pose_json = json.dumps({
                 'position': {
                     'x': self.robot_pose.pose.position.x,
@@ -48,6 +52,9 @@ class Location:
                     'w': self.robot_pose.pose.orientation.w
                 }
             })
+
+            self.all_recorded_poses.append(self.robot_pose)
+            self.create_updated_path()
 
             if self.start_marker_is_not_set == True:
                 rospy.loginfo("start marker found")
@@ -80,9 +87,16 @@ class Location:
         marker.color.g = 0.1
         marker.color.b = 0.0
 
-        marker.lifetime = rospy.Duration()
+        marker.lifetime = rospy.Duration(42600)
 
         return marker
+    
+    def create_updated_path(self):
+        path = Path()
+        path.header.frame_id = 'map'
+        path.header.stamp = rospy.Time.now()
+        path.poses = self.all_recorded_poses
+        self.path_pub.publish(path)
 
 if __name__ == '__main__':
     try:
