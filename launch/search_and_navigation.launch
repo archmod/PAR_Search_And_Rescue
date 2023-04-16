@@ -12,5 +12,9 @@
     </node>
 
     <node if="$(arg recognize)" name="hazard_detection_node" pkg="par_search_and_rescue" type="recognise_node.py" output="screen"/>
-
+    <node name="follow" pkg="par_search_and_rescue" type="follower2.py" output="screen" >
+        <param name="threshold_min" value="0.15" />
+        <param name="threshold_max" value="0.3" />
+        <param name="minWallDistance" value="0.5" />
+    </node>
 </launch>

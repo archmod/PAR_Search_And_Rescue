@@ -1,0 +1,31 @@
+  seq: 151
+  stamp: 
+    secs: 1681617905
+    nsecs: 642269842
+  frame_id: "camera_rgb_optical_frame"
+objects: 
+  layout: 
+    dim: []
+    data_offset: 0
+  data: [4.0, 304.0, 313.0, 1.1655124425888062, -0.10509549081325531, -0.00021220860071480274, 0.14868615567684174, 1.3142077922821045, 0.0004670840280596167, 0.709343433380127, -29.840456008911133, 1.0]   
+   
+    header: This section contains metadata about the message.
+        seq: A sequence number that increments with each new message. It's used to track the order of messages.
+        stamp: A timestamp representing when the message was created, given in seconds (secs) and nanoseconds (nsecs).
+        frame_id: The reference frame in which the object data is provided, in this case, "camera_rgb_optical_frame."
+
+    objects: This section contains the actual object data.
+        layout: Describes the layout of the multi-dimensional data array.
+            dim: An array describing the dimensions of the data array. It is empty here, meaning the data array is considered one-dimensional.
+            data_offset: The offset into the data array where the actual data starts. In this case, it's 0, so the data starts right at the beginning of the array.
+        data: A one-dimensional array of float values that represent the detected object information. The data is organized into groups of 12 values for each detected object. For this message, there's only one detected object, so the array has 12 values.
+
+For the object data, each group of 12 values contains the following information:
+
+    Object ID: The ID of the recognized object (4.0).
+    Confidence: The confidence of the object recognition (304.0).
+    Image width and height: The width (313.0) and height (1.1655124425888062) of the object in the image.
+    X and Y: The X (-0.10509549081325531) and Y (-0.00021220860071480274) positions of the object in the camera frame.
+    Z: The Z position (0.14868615567684174) of the object in the camera frame.
+    Roll, pitch, and yaw: The object's orientation angles in the camera frame (1.3142077922821045, 0.0004670840280596167, 0.709343433380127).
+    Image left-top corner X and Y: The X (-29.840456008911133) and Y (1.0) positions of the top-left corner of the object in the image.
