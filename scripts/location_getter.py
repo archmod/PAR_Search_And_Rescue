@@ -6,29 +6,17 @@ import json
 
 class Location:
     def __init__(self):
-        rospy.init_node('robot_location')
+        rospy.init_node('robot_location_getter')
         self.robot_pose = PoseStamped()
         self.listener = tf.TransformListener()
-        self.marker_pub = rospy.Publisher('/location_marker', Marker, queue_size=1)
+        self.marker_pub = rospy.Publisher('/travelled_marker', Marker, queue_size=1)
+        self.start_marker_pub = rospy.Publisher('/start_travelled_marker', Marker, queue_size=1)
+        self.start_marker_is_not_set = True
         self.pose_publisher()
 
-    def tf_callback(self, msg):
-        if msg.header.frame_id == 'map' and msg.child_frame_id == 'base_link':
-            # Convert transform to pose
-            self.robot_pose.pose.position.x = msg.transform.translation.x
-            self.robot_pose.pose.position.y = msg.transform.translation.y
-            self.robot_pose.pose.position.z = msg.transform.translation.z
-            self.robot_pose.pose.orientation.x = msg.transform.rotation.x
-            self.robot_pose.pose.orientation.y = msg.transform.rotation.y
-            self.robot_pose.pose.orientation.z = msg.transform.rotation.z
-            self.robot_pose.pose.orientation.w = msg.transform.rotation.w
-            self.robot_pose.header.stamp = msg.header.stamp
-            self.robot_pose.header.frame_id = 'map'
-
-
-    # Set up publisher for storing robot pose in a ROS parameter
     def pose_publisher(self):
-        rate = rospy.Rate(100) # Update rate in Hz
+        rospy.sleep(1) # Important ! Allows Detection of True Values
+
         while not rospy.is_shutdown():
             try:
                 # Lookup transform from map to base_link
@@ -61,9 +49,18 @@ class Location:
                 }
             })
 
-            rospy.loginfo('Robot pose: %s', pose_json)
-            self.marker_pub.publish(self.create_marker(self.robot_pose))
+            if self.start_marker_is_not_set == True:
+                rospy.loginfo("start marker found")
+                self.start_marker_pub.publish(self.create_marker(self.robot_pose))
+                self.start_marker_is_not_set = False
+                rospy.loginfo('Starting pose: %s', pose_json)
+            else:
+                self.marker_pub.publish(self.create_marker(self.robot_pose))
+                rospy.loginfo('Robot pose: %s', pose_json)
 
+
+            # Add Delay !
+            rospy.sleep(5)
 
     def create_marker(self, pose):
         marker = Marker()
@@ -77,7 +74,7 @@ class Location:
         marker.scale.y = 0.1
         marker.scale.z = 0.1
 
-        # Green
+        # Green -- 
         marker.color.a = 1.0
         marker.color.r = 0.0
         marker.color.g = 0.1

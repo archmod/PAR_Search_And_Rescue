@@ -1,0 +1,4 @@
+<launch>
+    <node name="robot_location_getter" pkg="par_search_and_rescue" type="location_getter.py" output="screen" >
+    </node>
+</launch>
