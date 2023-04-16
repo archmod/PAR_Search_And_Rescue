@@ -167,8 +167,8 @@ catkin_install_python(PROGRAMS
   scripts/exampleRotateScript.py
   scripts/follower.py
   scripts/follower2.py
-  scripts/testRotateScript.py
   scripts/recognise.py
+  scripts/recognise_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

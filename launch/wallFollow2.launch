@@ -1,0 +1,4 @@
+<launch>
+    <node name="wallFollow" pkg="par_search_and_rescue" type="wallFollow.py" output="screen" >
+    </node>
+</launch>
