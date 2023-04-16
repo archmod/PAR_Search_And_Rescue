@@ -7,6 +7,7 @@ import tf2_ros
 import tf2_geometry_msgs
 import math
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Int32
 
 class Recognition_Image(Enum):
     UNKNOWN = 0
@@ -33,22 +34,73 @@ class HazardDetection:
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
-        rospy.Subscriber('/amcl_pose', PoseStamped, self.pose_callback)
-        self.robot_pose = None
 
         self.hazard_marker_pub = rospy.Publisher('/hazards', Marker, queue_size=10)
-
+        self.start_marker_pub = rospy.Publisher('/startMarker', Int32, queue_size=10)
         self.lidar_scan = None
         rospy.Subscriber('/scan', LaserScan, self.lidar_scan_callback)
 
         rospy.spin()
 
-    def pose_callback(self, msg):
-        self.robot_pose = msg
     
     def lidar_scan_callback(self, msg):
         self.lidar_scan = msg
 
+    
+    def transform_point_to_map_frame(self, point_stamped):
+        try:
+            target_frame = "map"
+            source_frame = point_stamped.header.frame_id
+            transform = self.tf_buffer.lookup_transform(target_frame, source_frame, rospy.Time(0), rospy.Duration(1.0))
+            transformed_point_stamped = tf2_geometry_msgs.do_transform_point(point_stamped, transform)
+            return transformed_point_stamped.point.x, transformed_point_stamped.point.y, transformed_point_stamped.point.z
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rospy.logerr("Failed to transform object position to map frame")
+            return None, None, None
+    def callback(self, msg):
+        if self.lidar_scan is None:
+            return
+
+        for i in range(0, len(msg.objects.data), 12):
+            object_id = int(msg.objects.data[i])
+            confidence = msg.objects.data[i + 1]
+            image_x = msg.objects.data[i + 7]
+            image_y = msg.objects.data[i + 6]
+
+            recognized_image = Recognition_Image(object_id)
+            print(f"Recognized {recognized_image.name} (ID: {object_id}) with Confidence: {confidence}")
+            if object_id == Recognition_Image.START.value:
+                startMessage = Int32()
+                startMessage.data = 1
+                self.start_marker_pub.publish(startMessage)
+                print("Start Marker Found")
+            elif confidence > 0.5 and object_id != Recognition_Image.START.value:
+                
+                # Get the angle corresponding to the detected object's image_x coordinate
+                angle_increment = self.lidar_scan.angle_increment
+                angle_min = self.lidar_scan.angle_min
+                image_angle = angle_min + image_x * angle_increment
+
+                # Get the distance to the detected object using the LiDAR data
+                lidar_index = int((image_angle - angle_min) / angle_increment)
+                distance = self.lidar_scan.ranges[lidar_index]
+
+                # Create a PointStamped message for the object position in the laser frame
+                point_stamped = PointStamped()
+                point_stamped.header.frame_id = self.lidar_scan.header.frame_id
+                point_stamped.header.stamp = rospy.Time(0)
+                point_stamped.point.x = distance * math.cos(image_angle)
+                point_stamped.point.y = distance * math.sin(image_angle)
+                point_stamped.point.z = 0.0
+
+                # Transform object position to map frame
+                map_x, map_y, _ = self.transform_point_to_map_frame(point_stamped)
+
+                if map_x is not None and map_y is not None:
+                    hazard_marker = self.create_hazard_marker(object_id, map_x, map_y, 0)
+                    self.hazard_marker_pub.publish(hazard_marker)
+                    print(f"Published hazard marker {recognized_image.name} (ID: {object_id}) at (x, y): {map_x}, {map_y}")
+    
     def create_hazard_marker(self, marker_id, x, y, z):
         marker = Marker()
         marker.header.frame_id = "map"
@@ -78,54 +130,6 @@ class HazardDetection:
 
         return marker
    
-    def transform_point_to_map_frame(self, point_stamped):
-        try:
-            target_frame = "map"
-            source_frame = point_stamped.header.frame_id
-            transform = self.tf_buffer.lookup_transform(target_frame, source_frame, rospy.Time(0), rospy.Duration(1.0))
-            transformed_point_stamped = tf2_geometry_msgs.do_transform_point(point_stamped, transform)
-            return transformed_point_stamped.point.x, transformed_point_stamped.point.y, transformed_point_stamped.point.z
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-            rospy.logerr("Failed to transform object position to map frame")
-            return None, None, None
-    def callback(self, msg):
-        if self.lidar_scan is None:
-            return
-
-        for i in range(0, len(msg.objects.data), 12):
-            object_id = int(msg.objects.data[i])
-            confidence = msg.objects.data[i + 1]
-            image_x = msg.objects.data[i + 7]
-            image_y = msg.objects.data[i + 6]
-
-            recognized_image = Recognition_Image(object_id)
-            print(f"Recognized {recognized_image.name} (ID: {object_id}) with Confidence: {confidence}")
-
-            if confidence > 0.5 and object_id != Recognition_Image.START.value:
-                # Get the angle corresponding to the detected object's image_x coordinate
-                angle_increment = self.lidar_scan.angle_increment
-                angle_min = self.lidar_scan.angle_min
-                image_angle = angle_min + image_x * angle_increment
-
-                # Get the distance to the detected object using the LiDAR data
-                lidar_index = int((image_angle - angle_min) / angle_increment)
-                distance = self.lidar_scan.ranges[lidar_index]
-
-                # Create a PointStamped message for the object position in the laser frame
-                point_stamped = PointStamped()
-                point_stamped.header.frame_id = self.lidar_scan.header.frame_id
-                point_stamped.header.stamp = rospy.Time(0)
-                point_stamped.point.x = distance * math.cos(image_angle)
-                point_stamped.point.y = distance * math.sin(image_angle)
-                point_stamped.point.z = 0.0
-
-                # Transform object position to map frame
-                map_x, map_y, _ = self.transform_point_to_map_frame(point_stamped)
-
-                if map_x is not None and map_y is not None:
-                    hazard_marker = self.create_hazard_marker(object_id, map_x, map_y, 0)
-                    self.hazard_marker_pub.publish(hazard_marker)
-                    print(f"Published hazard marker {recognized_image.name} (ID: {object_id}) at (x, y): {map_x}, {map_y}")
 
 if __name__ == '__main__':
     try:
