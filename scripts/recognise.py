@@ -37,11 +37,13 @@ class Recognise:
         for i in range(0, len(msg.objects.data), 12):
             object_id = int(msg.objects.data[i])
             confidence = msg.objects.data[i + 1]
-            print("Recognized object ID:", object_id, "Confidence:", confidence)
+            # print("Recognized object ID:", object_id, "Confidence:", confidence)
             if confidence > highest_confidence:
                 highest_confidence = confidence
                 highest_id = object_id
-        print("Highest confidence object ID:", highest_id, " Confidence:", highest_confidence)
+        # print("Highest confidence object ID:", highest_id, " Confidence:", highest_confidence)
+
+        # TODO: If a sign was just found - add a delay before looking for another sign
 
         # Considers If No Sign is Found
         if highest_id != -1:
