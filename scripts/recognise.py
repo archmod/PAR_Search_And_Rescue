@@ -20,6 +20,9 @@ signage_id = {
     13: 'Start'
 }
 
+REQUIRED_SIGN_IDENTIFY_COUNT = 2
+SECONDS_UNTIL_RESET = 10
+
 class Recognise:
     def __init__(self):
         print("IM RUNNING BOSS")
@@ -27,7 +30,19 @@ class Recognise:
         rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
         self.image_detected_pub = rospy.Publisher('/image_detected', Bool, queue_size=1)
         self.start_image_pub = rospy.Publisher('/start_image', Bool, queue_size=1)
+
+        # Map Signs to the Count of Confident Instances
+        self.confident_sign_detection_within_timer = {}
+        self.timer = rospy.Timer(rospy.Duration(SECONDS_UNTIL_RESET), self.timer_callback)
+
         rospy.spin()
+
+    def timer_callback(self, msg):
+        self.reset_signs_identify_count_within_5_seconds('Timer Callback: ' + str(msg))
+
+    def reset_signs_identify_count_within_5_seconds(self, calledFrom):
+        self.confident_sign_detection_within_timer = {}
+        rospy.loginfo("--- Reset " + calledFrom + " ---")
 
     def callback(self, msg):
         # Iterate through the objects in the message
@@ -37,28 +52,43 @@ class Recognise:
         for i in range(0, len(msg.objects.data), 12):
             object_id = int(msg.objects.data[i])
             confidence = msg.objects.data[i + 1]
-            # print("Recognized object ID:", object_id, "Confidence:", confidence)
+
             if confidence > highest_confidence:
                 highest_confidence = confidence
                 highest_id = object_id
-        # print("Highest confidence object ID:", highest_id, " Confidence:", highest_confidence)
-
-        # TODO: If a sign was just found - add a delay before looking for another sign
-
-        # Considers If No Sign is Found
+        
+        # Case: If No Sign is Found, Don't Add
         if highest_id != -1:
-            # Print the Sign Name found to have the Highest Confidence
-            rospy.loginfo(signage_id[highest_id])
+            # Count Number of Times Sign was Had Highest Confidence
+            if highest_id in self.confident_sign_detection_within_timer:
+                self.confident_sign_detection_within_timer[highest_id] = self.confident_sign_detection_within_timer.get(highest_id) + 1
+            else:
+                self.confident_sign_detection_within_timer[highest_id] = 1
 
-            # Commented as Causes Stop in Logging Messages
-            # self.image_detected_pub.publish(Bool(data=True))
+        # Check What Signs have High Count
+        for sign, count in self.confident_sign_detection_within_timer.items():
 
-            if highest_id == 13:
-                self.startPosition()
+            rospy.loginfo("(Sign, Count): (" + str(sign) + ", " + str(count) + ")")
+
+            if count >= REQUIRED_SIGN_IDENTIFY_COUNT:
+
+                # Commented as Causes Stop in Logging Messages
+                # self.image_detected_pub.publish(Bool(data=True))
+
+                if highest_id == 13:
+                    self.startPosition()
+
+                # Print the Sign Name found to have the Highest Confidence
+                rospy.loginfo("Sign Confidently Found: (" + str(signage_id[sign]) + ", " + str(count) + ")")
+
+                # Reset Count
+                self.reset_signs_identify_count_within_5_seconds('Num Confident Instances Satisified')
+
+        rospy.loginfo(self.confident_sign_detection_within_timer)
 
     def startPosition(self):
         print("Start sign found")
-        self.start_image_pub.publish(Bool(data=True))
+        # self.start_image_pub.publish(Bool(data=True))
 
 if __name__ == '__main__':
     try:
