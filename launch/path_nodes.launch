@@ -1,4 +1,5 @@
 <launch>
     <include file="$(find par_search_and_rescue)/launch/path_node.launch" />
     <include file="$(find par_search_and_rescue)/launch/path_recorder.launch" />
+    <include file="$(find par_search_and_rescue)/launch/recognise_node.launch" />
 </launch>

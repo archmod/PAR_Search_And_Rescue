@@ -63,6 +63,7 @@ class HazardDetection:
     def callback(self, msg):
         if self.lidar_scan is None:
             return
+        print("Callback hit")
 
         for i in range(0, len(msg.objects.data), 12):
             object_id = int(msg.objects.data[i])
