@@ -4,13 +4,31 @@
 
     <arg if="$(arg recognize)" name="chosen_world" value="rosbot_world_recognition"/>
 
-    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
+    <node pkg="find_object_2d" type="find_object_2d" name="find_object_node">
         <remap from="image" to="/camera/rgb/image_raw"/>
-        <!-- <param name="gui" value="$(arg teach)"/> -->
+         <!-- <param name="gui" value="$(arg teach)"/> -->
         <param name="gui" value="true"/>
         <param if="$(arg recognize)" name="objects_path" value="$(find par_search_and_rescue)/image_rec/"/>
+        <param name="image_processing" value="split_rgb"/>
+        <param name="split_channels" value="1"/>
+        <param name="split_prefix" value="red"/>
+        <param name="split_channels" value="2"/>
+        <param name="split_prefix" value="green"/>
+        <param name="split_channels" value="3"/>
+        <param name="split_prefix" value="blue"/>
+    </node>
+
+    <node pkg="image_view" type="image_view" name="red_channel_viewer">
+        <remap from="image" to="/find_object_2d/red"/>
+    </node>
+
+    <node pkg="image_view" type="image_view" name="green_channel_viewer">
+        <remap from="image" to="/find_object_2d/green"/>
+    </node>
+
+    <node pkg="image_view" type="image_view" name="blue_channel_viewer">
+        <remap from="image" to="/find_object_2d/blue"/>
     </node>
 
     <node if="$(arg recognize)" name="recognise" pkg="par_search_and_rescue" type="recognise.py" output="screen"/>
-
 </launch>
