@@ -169,6 +169,9 @@ catkin_install_python(PROGRAMS
   scripts/follower2.py
   scripts/recognise.py
   scripts/recognise_node.py
+  scripts/path_node.py
+  scripts/followertest.py
+  scripts/path_recorder_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

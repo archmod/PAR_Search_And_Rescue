@@ -90,33 +90,36 @@ class Follower:
         listener = tf.TransformListener()
 
         laser_pose = PoseStamped()
-        laser_pose.header.frame_id = "laser"
-        laser_pose.pose.position.x = x
-        laser_pose.pose.position.y = y
+        laser_pose.header.frame_id = "map"
+        laser_pose.pose.position.x = 5.0
+        laser_pose.pose.position.y = 2.0
         laser_pose.pose.position.z = 0.0
         laser_pose.pose.orientation.x = 0.0
         laser_pose.pose.orientation.y = 0.0
         laser_pose.pose.orientation.z = 0.0
         laser_pose.pose.orientation.w = 1.0
 
-        while not rospy.is_shutdown():
-            try:
-                listener.lookupTransform('map', "laser", rospy.Time.now())
-                break
-            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-                continue
+        # while not rospy.is_shutdown():
+        #     try:
+        #         listener.lookupTransform('map', "laser", rospy.Time(0))
+        #         break
+        #     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+        #         print("EXCEPT. WAITING")
+        #         # print exception below 
+        #         print(e)
+        #         continue
 
-        # Transform the pose from laser to map frame
-        transposed = listener.transformPose('map', laser_pose)
-        print("Pose transformed to: \n" + str(transposed.pose))
+        # # Transform the pose from laser to map frame
+        # transposed = listener.transformPose('map', laser_pose)
+        # print("Pose transformed to: \n" + str(transposed.pose))
 
-        target_pose = transposed
+        # target_pose = transposed
 
         rate = rospy.Rate(1)
         rate.sleep()
         print("goal sent")
         self.publish_marker(laser_pose.pose)
-        self.pub_gotopose.publish(target_pose)
+        self.pub_gotopose.publish(laser_pose)
 
     def publish_marker(self, pose):
         marker = Marker()

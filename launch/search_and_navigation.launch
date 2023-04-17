@@ -17,4 +17,6 @@
         <param name="threshold_max" value="0.3" />
         <param name="minWallDistance" value="0.5" />
     </node>
+    <node name="path_node" pkg="par_search_and_rescue" type="path_node.py" output="screen" >
+    </node>
 </launch>

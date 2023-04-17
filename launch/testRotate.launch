@@ -1,4 +1,0 @@
-<launch>
-    <node name="rotate" pkg="par_search_and_rescue" type="testRotateScript.py" output="screen" >
-    </node>
-</launch>

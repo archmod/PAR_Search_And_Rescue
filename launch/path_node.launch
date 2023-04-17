@@ -1,0 +1,4 @@
+<launch>
+    <node name="path_node" pkg="par_search_and_rescue" type="path_node.py" output="screen" >
+    </node>
+</launch>
