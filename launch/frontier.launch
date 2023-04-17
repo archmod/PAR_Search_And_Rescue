@@ -1,0 +1,6 @@
+<launch>
+
+    <node name="frontier" pkg="par_search_and_rescue" type="frontiergen.py" output="screen" >
+    </node>
+
+</launch>
