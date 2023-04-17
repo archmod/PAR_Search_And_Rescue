@@ -33,7 +33,7 @@ class HazardDetection:
     def __init__(self):
         print("IM RUNNING BOSS")
         rospy.init_node('hazard_detection_node', anonymous=True)
-
+        self.startTime = rospy.get_time()
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
@@ -52,6 +52,8 @@ class HazardDetection:
         self.mY = 0
         self.published = False
         self.publish_data()
+        max_duration = rospy.get_param("~returnHomeTimer", 60)
+        self.endTime = self.startTime + max_duration
         rospy.spin()
 
     def publish_data(self):
@@ -59,6 +61,9 @@ class HazardDetection:
             if self.published:
                 print("printing")
                 self.publish_fixed_marker(self.mX, self.mY)
+            if rospy.get_time() > self.endTime:
+                self.publish_start_marker()
+                self.published = True
     
     def lidar_scan_callback(self, msg):
         self.lidar_scan = msg

@@ -1,0 +1,4 @@
+<launch>
+      <node name="return_home_node" pkg="par_search_and_rescue" type="return_home_node.py" output="screen" >
+    </node>
+</launch>

@@ -24,7 +24,7 @@ class FrontierExplore:
             print("waiting for frontier")
             rate.sleep()
         
-        self.listener.waitForTransform('/map', '/base_link', rospy.Time(), rospy.Duration(1.0))
+        self.listener.waitForTransform('/map', '/base_link', rospy.Time(0), rospy.Duration(1.0))
         ((x, y, _), rot) = self.listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 
         next_point = self.closest_point(self.frontier, (x, y))
