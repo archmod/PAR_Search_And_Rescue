@@ -10,8 +10,7 @@ class PathNode:
         self.buffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.buffer)
 
-        self.start_marker_pub = rospy.Publisher('/start_marker', Marker, queue_size=1)
-        self.path_marker_pub = rospy.Publisher('/path', Marker, queue_size=10)
+        self.start_position_pub = rospy.Publisher('/start_position', Marker, queue_size=1)
         self.publish_start_marker()
 
     def publish_start_marker(self):
@@ -34,7 +33,7 @@ class PathNode:
         start_marker = self.create_start_marker(start_pose)
 
         while not rospy.is_shutdown():
-            self.start_marker_pub.publish(start_marker)
+            self.start_position_pub.publish(start_marker)
             rospy.sleep(1)
 
 

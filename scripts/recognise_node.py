@@ -8,6 +8,8 @@ import tf2_geometry_msgs
 import math
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Int32
+from visualization_msgs.msg import MarkerArray
+
 
 class Recognition_Image(Enum):
     UNKNOWN = 0
@@ -31,19 +33,37 @@ class HazardDetection:
     def __init__(self):
         print("IM RUNNING BOSS")
         rospy.init_node('hazard_detection_node', anonymous=True)
-
+        self.startTime = rospy.get_time()
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
 
-        self.hazard_marker_pub = rospy.Publisher('/hazards', Marker, queue_size=10)
+        # self.hazard_marker_pub = rospy.Publisher('/hazards', Marker, queue_size=10)
+        self.hazard_marker_pub = rospy.Publisher('/hazards', MarkerArray, queue_size=10)
+        self.hazard_markers = []
+
         self.start_marker_pub = rospy.Publisher('/startMarker', Int32, queue_size=10)
         self.lidar_scan = None
         rospy.Subscriber('/scan', LaserScan, self.lidar_scan_callback)
+        self.fixed_marker_pub = rospy.Publisher('/fixed_marker', Marker, queue_size=1)
 
+        self.mX = 0
+        self.mY = 0
+        self.published = False
+        self.publish_data()
+        max_duration = rospy.get_param("~returnHomeTimer", 60)
+        self.endTime = self.startTime + max_duration
         rospy.spin()
 
+    def publish_data(self):
+        while not rospy.is_shutdown():
+            if self.published:
+                print("printing")
+                self.publish_fixed_marker(self.mX, self.mY)
+            if rospy.get_time() > self.endTime:
+                self.publish_start_marker()
+                self.published = True
     
     def lidar_scan_callback(self, msg):
         self.lidar_scan = msg
@@ -53,17 +73,20 @@ class HazardDetection:
         try:
             target_frame = "map"
             source_frame = point_stamped.header.frame_id
-            transform = self.tf_buffer.lookup_transform(target_frame, source_frame, rospy.Time(0), rospy.Duration(1.0))
+            transform = self.tf_buffer.lookup_transform(target_frame, source_frame, point_stamped.header.stamp, rospy.Duration(1.0))
+
             transformed_point_stamped = tf2_geometry_msgs.do_transform_point(point_stamped, transform)
             return transformed_point_stamped.point.x, transformed_point_stamped.point.y, transformed_point_stamped.point.z
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.logerr("Failed to transform object position to map frame")
             return None, None, None
+
         
     def callback(self, msg):
         if self.lidar_scan is None:
             return
         print("Callback hit")
+        
 
         for i in range(0, len(msg.objects.data), 12):
             object_id = int(msg.objects.data[i])
@@ -102,9 +125,19 @@ class HazardDetection:
                 map_x, map_y, _ = self.transform_point_to_map_frame(point_stamped)
 
                 if map_x is not None and map_y is not None:
-                    hazard_marker = self.create_hazard_marker(object_id, map_x, map_y, 0)
-                    self.hazard_marker_pub.publish(hazard_marker)
                     print(f"Published hazard marker {recognized_image.name} (ID: {object_id}) at (x, y): {map_x}, {map_y}")
+                    hazard_marker = self.create_hazard_marker(object_id, map_x, map_y, 0)
+                    # self.hazard_markers.append(hazard_marker)
+                    marker_array = MarkerArray()
+                    marker_array.markers = self.hazard_markers
+                    # self.hazard_marker_pub.publish(marker_array)
+                    if not self.published:
+                        self.published = True
+                        self.mX = map_x
+                        self.mY = map_y
+                    # self.publish_fixed_marker(map_x, map_y)
+                    rospy.sleep(0.3)
+
     
     def create_hazard_marker(self, marker_id, x, y, z):
         marker = Marker()
@@ -114,11 +147,11 @@ class HazardDetection:
 
         marker.pose.position.x = x
         marker.pose.position.y = y
-        marker.pose.position.z = z
-        marker.pose.orientation.x = 0.0
-        marker.pose.orientation.y = 0.0
-        marker.pose.orientation.z = 0.0
-        marker.pose.orientation.w = 1.0
+        marker.pose.position.z = 0
+        # marker.pose.orientation.x = 0.0
+        # marker.pose.orientation.y = 0.0
+        # marker.pose.orientation.z = 0.0
+        # marker.pose.orientation.w = 1.0
 
         marker.scale.x = 0.1
         marker.scale.y = 0.1
@@ -128,13 +161,34 @@ class HazardDetection:
         marker.color.g = 0.0
         marker.color.b = 0.0
         marker.color.a = 1.0
-
-        marker.lifetime = rospy.Duration()
-
-        marker.id = marker_id
-
+        # marker.id = marker_id
         return marker
-   
+
+    def publish_fixed_marker(self,x, y):
+        fixed_marker = Marker()
+        fixed_marker.header.frame_id = "map"
+        fixed_marker.type = Marker.CUBE
+        fixed_marker.action = Marker.ADD
+        fixed_marker.id = 0
+
+        fixed_marker.pose.position.x = x
+        fixed_marker.pose.position.y = y
+        fixed_marker.pose.position.z = 0
+        fixed_marker.pose.orientation.x = 0.0
+        fixed_marker.pose.orientation.y = 0.0
+        fixed_marker.pose.orientation.z = 0.0
+        fixed_marker.pose.orientation.w = 1.0
+
+        fixed_marker.scale.x = 0.3
+        fixed_marker.scale.y = 0.3
+        fixed_marker.scale.z = 0.3
+
+        fixed_marker.color.r = 1.0
+        fixed_marker.color.g = 1.0
+        fixed_marker.color.b = 0.0
+        fixed_marker.color.a = 1.0
+        self.fixed_marker_pub.publish(fixed_marker)
+
 
 if __name__ == '__main__':
     try:
