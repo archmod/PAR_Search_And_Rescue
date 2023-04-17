@@ -1,0 +1,8 @@
+<launch>
+
+    <node name="rotate" pkg="aiil_rosbot_demo" type="rotate.py" output="screen" >
+        <param name="speed" value="0.5" />
+        <param name="duration" value="5" />
+    </node>
+
+</launch>

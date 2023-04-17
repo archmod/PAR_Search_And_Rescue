@@ -172,6 +172,11 @@ catkin_install_python(PROGRAMS
   scripts/path_node.py
   scripts/followertest.py
   scripts/path_recorder_node.py
+  scripts/frontiergen.py
+  scripts/frontierexplore.py
+  scripts/follower3.py
+  scripts/wallfollow_node.py
+  scripts/return_home_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

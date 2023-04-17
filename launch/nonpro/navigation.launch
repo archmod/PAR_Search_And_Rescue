@@ -1,0 +1,27 @@
+<launch>
+    <!-- Choose map format from the below options -->
+
+    <!-- Launch GMapping from Route Admin Panel (for dynamic map / SLAM) -->
+    <include file="$(find route_admin_panel)/launch/gmapping.launch" />
+
+    <!-- Launch AMCL from Route Admin Panel (for static map w/ the Map Server) -->
+    <!--
+    <arg name="map_file" default="$(find aiil_rosbot_demo)/maps/test_map.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+    <include file="$(find route_admin_panel)/launch/amcl.launch" />
+    -->
+
+    <!-- Move Base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <rosparam file="$(find aiil_rosbot_demo)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find aiil_rosbot_demo)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find aiil_rosbot_demo)/config/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find aiil_rosbot_demo)/config/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find aiil_rosbot_demo)/config/trajectory_planner.yaml" command="load" />
+
+      <remap from="cmd_vel" to="cmd_vel"/>
+      <remap from="odom" to="odom"/>
+      <remap from="scan" to="/scan"/>
+
+    </node>
+</launch>
