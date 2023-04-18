@@ -63,7 +63,7 @@ class ReturnHomeNode:
 if __name__ == '__main__':
     try:
         rospy.init_node('return_home_node')
-        return_home_node = ReturnHomeNode(360)
+        return_home_node = ReturnHomeNode(330)
         return_home_node.run()
     except rospy.ROSInterruptException:
         pass
