@@ -1,9 +1,8 @@
 <launch>
-    <node name="wall_follow" pkg="par_search_and_rescue" type="follower2.py" output="screen" >
-        <param name="threshold_min" value="0.15" />
-        <param name="threshold_max" value="0.3" />
-        <param name="minWallDistance" value="0.5" />
-    </node>
+    <!-- Launch Hardware -->
+    <include file="$(find par_search_and_rescue)/launch/rosbot_pro.launch" />
 
-    <include file="$(find par_search_and_rescue)/launch/find_object.launch" />
+    <!-- Launch Mapping & Navigation-->
+    <include file="$(find par_search_and_rescue)/launch/navigation.launch" />
+
 </launch>

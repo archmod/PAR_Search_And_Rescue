@@ -56,8 +56,9 @@ class HazardDetection:
     def publish_data(self):
         while not rospy.is_shutdown():
             if self.published:
-                print("printing")
-                self.publish_fixed_marker(self.mX, self.mY)
+                print("printing hazard markers")
+                # self.publish_fixed_marker(self.mX, self.mY)
+                self.hazard_marker_pub.publish(self.hazard_markers)
     
     def lidar_scan_callback(self, msg):
         self.lidar_scan = msg
@@ -117,18 +118,13 @@ class HazardDetection:
 
                 # Transform object position to map frame
                 map_x, map_y, _ = self.transform_point_to_map_frame(point_stamped)
-
                 if map_x is not None and map_y is not None:
                     print(f"Published hazard marker {recognized_image.name} (ID: {object_id}) at (x, y): {map_x}, {map_y}")
                     hazard_marker = self.create_hazard_marker(object_id, map_x, map_y, 0)
-                    # self.hazard_markers.append(hazard_marker)
+                    self.hazard_markers.append(hazard_marker)
                     marker_array = MarkerArray()
                     marker_array.markers = self.hazard_markers
-                    # self.hazard_marker_pub.publish(marker_array)
-                    if not self.published:
-                        self.published = True
-                        self.mX = map_x
-                        self.mY = map_y
+                    self.hazard_marker_pub.publish(marker_array)
                     # self.publish_fixed_marker(map_x, map_y)
                     rospy.sleep(0.3)
 

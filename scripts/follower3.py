@@ -40,10 +40,11 @@ class Follower:
         rospy.init_node('follower')
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
         rospy.Subscriber('/scan', LaserScan, self.process_scan)
-        rospy.Subscriber('/odom', Odometry, self.process_odom)
+        # rospy.Subscriber('/odom', Odometry, self.process_odom)
         print("setup done")
 
     def process_scan(self, msg):
+        print("message")
         num_scans = len(msg.ranges)
         scans_per_region = num_scans // 8
         ranges = [(index, r) for index, r in enumerate(msg.ranges)]
@@ -92,7 +93,7 @@ class Follower:
     
 
     def start(self, closestRight):
-        if closestRight < self.threshold_max:
+        if closestRight < self.threshold_min:
             self.go_straight()
         else:
             self.right_turn_90()
@@ -168,7 +169,7 @@ class Follower:
         duration = rospy.Duration.from_sec(3.0)  # seconds
         start_time = rospy.Time.now()
         while (rospy.Time.now() - start_time) < duration:
-            self.make_move(0, 0.5)
+            self.make_move(0, -0.5)
             rospy.sleep(0.1)
 
         self.make_move(0,0)
@@ -193,6 +194,7 @@ class Follower:
 if __name__ == '__main__':
     try:
         follower = Follower()
+        print("blow me")
         rospy.spin()
         # follower.run()
     except rospy.ROSInterruptException:

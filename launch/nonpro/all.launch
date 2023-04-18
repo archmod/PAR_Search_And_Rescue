@@ -1,0 +1,8 @@
+<launch>
+    <!-- Launch Hardware -->
+    <include file="$(find aiil_rosbot_demo)/launch/rosbot_pro.launch" />
+
+    <!-- Launch Mapping & Navigation-->
+    <include file="$(find aiil_rosbot_demo)/launch/navigation.launch" />
+
+</launch>

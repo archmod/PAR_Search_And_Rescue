@@ -1,0 +1,27 @@
+<launch>
+    <!-- URDF description -->
+    <!-- Static transforms for the ROSBot Wheels-->
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro'"/>
+    <node pkg="tf" type="static_transform_publisher" name="fl_publisher" args="0.05 0.11 0 0 0 0 base_link front_left_wheel 250" />
+    <node pkg="tf" type="static_transform_publisher" name="fr_publisher" args="0.05 -0.11 0 0 0 0 base_link front_right_wheel 250" />
+    <node pkg="tf" type="static_transform_publisher" name="rl_publisher" args="-0.05 0.11 0 0 0 0 base_link rear_left_wheel 250" />
+    <node pkg="tf" type="static_transform_publisher" name="rr_publisher" args="-0.05 -0.11 0 0 0 0 base_link rear_right_wheel 250" />
+    
+
+    <!-- Robot State transform publisher. Args as given by husarion launch files -->
+    <!--node pkg="tf" type="static_transform_publisher" name="ROSbot_laser" args="0 0 0 3.14 0 0 base_link laser 100" /-->
+
+    <!-- Robot State Publisher -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+    <!-- Launch LIDAR -->
+    <include file="$(find rplidar_ros)/launch/rplidar_a3.launch"></include>
+
+    <!-- Launch Rosbot firmware -->
+    <include file="$(find rosbot_ekf)/launch/all.launch">
+        <arg name="rosbot_pro" value="true"/>    
+    </include> 
+
+    <!-- Launch Camera -->
+    <include file="$(find astra_launch)/launch/astra.launch"></include>
+</launch>
