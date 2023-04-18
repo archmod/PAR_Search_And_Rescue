@@ -59,6 +59,7 @@ class HazardDetection:
                 print("printing hazard markers")
                 # self.publish_fixed_marker(self.mX, self.mY)
                 self.hazard_marker_pub.publish(self.hazard_markers)
+                print(self.hazard_markers)
     
     def lidar_scan_callback(self, msg):
         self.lidar_scan = msg
@@ -75,13 +76,20 @@ class HazardDetection:
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.logerr("Failed to transform object position to map frame")
             return None, None, None
+            
+    
+    def is_hazard_present(self, x, y, hazard_id, threshold=0.1):
+        for marker in self.hazard_markers:
+            distance = math.sqrt((marker.pose.position.x - x)**2 + (marker.pose.position.y - y)**2)
+            if distance < threshold and marker.id == hazard_id:
+                return True
+        return False
 
         
     def callback(self, msg):
         if self.lidar_scan is None:
             return
         print("Callback hit")
-        
 
         for i in range(0, len(msg.objects.data), 12):
             object_id = int(msg.objects.data[i])
@@ -96,9 +104,9 @@ class HazardDetection:
                 startMessage.data = 1
                 self.start_marker_pub.publish(startMessage)
                 print("Start Marker Found")
-                
+
             elif confidence > CONFIDENCE_THRESHOLD and object_id != Recognition_Image.START.value:
-                
+
                 # Get the angle corresponding to the detected object's image_x coordinate
                 angle_increment = self.lidar_scan.angle_increment
                 angle_min = self.lidar_scan.angle_min
@@ -119,14 +127,15 @@ class HazardDetection:
                 # Transform object position to map frame
                 map_x, map_y, _ = self.transform_point_to_map_frame(point_stamped)
                 if map_x is not None and map_y is not None:
-                    print(f"Published hazard marker {recognized_image.name} (ID: {object_id}) at (x, y): {map_x}, {map_y}")
-                    hazard_marker = self.create_hazard_marker(object_id, map_x, map_y, 0)
-                    self.hazard_markers.append(hazard_marker)
-                    marker_array = MarkerArray()
-                    marker_array.markers = self.hazard_markers
-                    self.hazard_marker_pub.publish(marker_array)
-                    # self.publish_fixed_marker(map_x, map_y)
-                    rospy.sleep(0.3)
+                    if not self.is_hazard_present(map_x, map_y, object_id):
+                        print(f"Published hazard marker {recognized_image.name} (ID: {object_id}) at (x, y): {map_x}, {map_y}")
+                        hazard_marker = self.create_hazard_marker(object_id, map_x, map_y, 0)
+                        self.hazard_markers.append(hazard_marker)
+                        marker_array = MarkerArray()
+                        marker_array.markers = self.hazard_markers
+                        self.hazard_marker_pub.publish(marker_array)
+                        # self.publish_fixed_marker(map_x, map_y)
+                        rospy.sleep(0.3)
 
     
     def create_hazard_marker(self, marker_id, x, y, z):
@@ -138,10 +147,10 @@ class HazardDetection:
         marker.pose.position.x = x
         marker.pose.position.y = y
         marker.pose.position.z = 0
-        # marker.pose.orientation.x = 0.0
-        # marker.pose.orientation.y = 0.0
-        # marker.pose.orientation.z = 0.0
-        # marker.pose.orientation.w = 1.0
+        marker.pose.orientation.x = 0.0
+        marker.pose.orientation.y = 0.0
+        marker.pose.orientation.z = 0.0
+        marker.pose.orientation.w = 1.0
 
         marker.scale.x = 0.1
         marker.scale.y = 0.1
@@ -151,7 +160,7 @@ class HazardDetection:
         marker.color.g = 0.0
         marker.color.b = 0.0
         marker.color.a = 1.0
-        # marker.id = marker_id
+        marker.id = marker_id
         return marker
 
     def publish_fixed_marker(self,x, y):
