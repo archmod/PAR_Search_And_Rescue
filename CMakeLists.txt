@@ -164,7 +164,6 @@ include_directories(
 # -- Needed so that our python scripts can be found
 # -- Add All Python Scripts Below
 catkin_install_python(PROGRAMS
-  scripts/exampleRotateScript.py
   scripts/follower.py
   scripts/follower2.py
   scripts/recognise.py

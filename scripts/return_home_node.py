@@ -25,6 +25,9 @@ class ReturnHomeNode:
     def run(self):
         while not rospy.is_shutdown():
             if rospy.get_time() > self.endTime and self.endTime != -1:
+                print("Start to return home")
+                self.returnHomePublisher.publish(1)
+                rospy.sleep(1)
                 self.ReturnHome()
             else:
                 self.returnHomePublisher.publish(0)
@@ -60,7 +63,7 @@ class ReturnHomeNode:
 if __name__ == '__main__':
     try:
         rospy.init_node('return_home_node')
-        return_home_node = ReturnHomeNode(30)
+        return_home_node = ReturnHomeNode(360)
         return_home_node.run()
     except rospy.ROSInterruptException:
         pass
