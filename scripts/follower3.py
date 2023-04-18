@@ -3,6 +3,7 @@ import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
+from std_msgs import Bool, Int32
 from tf.transformations import euler_from_quaternion
 from math import pi, sin, cos, atan2
 from enum import Enum
@@ -15,6 +16,7 @@ class Bot_state(Enum):
     IDLE = 4
     FIRST_WALL = 5
     FOUND_WALL = 6
+    STOP = 7
 
 
 class Follower:
@@ -23,7 +25,7 @@ class Follower:
         self.threshold_max = rospy.get_param("~threshold_max", 0.5)
         #defaults to rosbot 1 unit on the grid
         # self.minWallDist = rospy.get_param("~minWallDistance", 0.5)
-        self.bot_state = Bot_state.START
+        self.bot_state = Bot_state.IDLE
 
         self.regions = {
             "front": [],
@@ -41,7 +43,20 @@ class Follower:
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
         rospy.Subscriber('/scan', LaserScan, self.process_scan)
         rospy.Subscriber('/odom', Odometry, self.process_odom)
+        rospy.Subscriber('/returnHome', Int32, self.process_stop)
+        rospy.Subscriber('/startMarker', Int32, self.process_start)
         print("setup done")
+
+    def process_start(self, msg):
+        if msg.data == 1:
+            self.bot_state = Bot_state.START
+    
+
+    def process_stop(self, msg):
+        if msg.data == 1:
+            self.make_move(0,0)
+            self.bot_state = Bot_state.STOP
+
 
     def process_scan(self, msg):
         num_scans = len(msg.ranges)
@@ -89,6 +104,12 @@ class Follower:
 
         elif self.bot_state == Bot_state.FOUND_WALL:
             self.follow_wall(closestRangeRight, closestRangeFront)
+        
+        elif self.bot_state == Bot_state.STOP:
+            print("STOPPING")
+            self.do_nothing()
+        elif self.bot_state == Bot_state.IDLE:
+            print("waiting for start")
     
 
     def start(self, closestRight):
