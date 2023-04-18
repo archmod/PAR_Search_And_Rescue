@@ -52,7 +52,7 @@ class Follower:
             "front": ranges[0 : scans_per_region - 1] + ranges[scans_per_region * 7 : -1],
             "left": ranges[scans_per_region: scans_per_region * 3 - 1],
             "back": ranges[scans_per_region * 3 : scans_per_region * 5 - 1],
-            "right": ranges[scans_per_region * 5 : scans_per_region * 7 - 1]
+            "right": ranges[scans_per_region * 5 : scans_per_region * 6 - 1]
         }
         self.direct_right_range = msg.ranges[len(msg.ranges)//4]
         self.right_range_diff = self.prev_direct_right - self.direct_right_range
