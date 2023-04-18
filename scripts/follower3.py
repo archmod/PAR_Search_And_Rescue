@@ -160,7 +160,7 @@ class Follower:
     
     def back_to_wall(self):
         print("back to wall")
-        self.make_move(0.1, -0.3)
+        self.make_move(0.1, -0.5)
 
     def turn_left(self):
         print("turn left")
