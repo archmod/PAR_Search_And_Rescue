@@ -41,6 +41,7 @@ class HazardDetection:
 
         # self.hazard_marker_pub = rospy.Publisher('/hazards', Marker, queue_size=10)
         self.hazard_marker_pub = rospy.Publisher('/hazards', MarkerArray, queue_size=10)
+        self.hazard_marker_pub_single = rospy.Publisher('/hazards_array', Marker, queue_size=10)
         self.hazard_markers = []
 
         self.start_marker_pub = rospy.Publisher('/startMarker', Int32, queue_size=10)
@@ -83,6 +84,8 @@ class HazardDetection:
             distance = math.sqrt((marker.pose.position.x - x)**2 + (marker.pose.position.y - y)**2)
             if distance < threshold and marker.id == hazard_id:
                 return True
+        # Janky way of getting it to print to the hazard topic per the spec
+
         return False
 
         
@@ -134,6 +137,7 @@ class HazardDetection:
                         marker_array = MarkerArray()
                         marker_array.markers = self.hazard_markers
                         self.hazard_marker_pub.publish(marker_array)
+                        self.hazard_marker_pub_single.publish(hazard_marker)
                         # self.publish_fixed_marker(map_x, map_y)
                         rospy.sleep(0.3)
 

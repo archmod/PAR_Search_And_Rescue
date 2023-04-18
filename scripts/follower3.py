@@ -3,7 +3,7 @@ import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from std_msgs import Bool, Int32
+from std_msgs.msg import Int32
 from tf.transformations import euler_from_quaternion
 from math import pi, sin, cos, atan2
 from enum import Enum
