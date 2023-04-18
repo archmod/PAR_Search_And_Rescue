@@ -40,8 +40,8 @@ class HazardDetection:
         rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
 
         # self.hazard_marker_pub = rospy.Publisher('/hazards', Marker, queue_size=10)
-        self.hazard_marker_pub = rospy.Publisher('/hazards', MarkerArray, queue_size=10)
-        self.hazard_marker_pub_single = rospy.Publisher('/hazards_array', Marker, queue_size=10)
+        self.hazard_marker_pub = rospy.Publisher('/hazards_array', MarkerArray, queue_size=10)
+        self.hazard_marker_pub_single = rospy.Publisher('/hazards', Marker, queue_size=10)
         self.hazard_markers = []
 
         self.start_marker_pub = rospy.Publisher('/startMarker', Int32, queue_size=10)

@@ -12,7 +12,7 @@ class PathRecorderNode:
         self.buffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.buffer)
 
-        self.path_pub = rospy.Publisher('/robot_path', Path, queue_size=10)
+        self.path_pub = rospy.Publisher('/path', Path, queue_size=10)
 
         self.path = Path()
         self.path.header.frame_id = 'map'
