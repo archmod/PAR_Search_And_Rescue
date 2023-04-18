@@ -8,7 +8,6 @@ import actionlib
 class ReturnHomeNode:
     def __init__(self, duration=360):
         rospy.init_node('return_home_node')
-        print("Im running return home")
         self.endTime = -1
         self.duration = duration
         self.returnHomePublisher = rospy.Publisher('/returnHome', Int32, queue_size=1)
@@ -25,7 +24,7 @@ class ReturnHomeNode:
 
     def run(self):
         while not rospy.is_shutdown():
-            if rospy.get_time() > self.endTime:
+            if rospy.get_time() > self.endTime and self.endTime != -1:
                 self.ReturnHome()
             else:
                 self.returnHomePublisher.publish(0)
@@ -46,6 +45,11 @@ class ReturnHomeNode:
         
     
     def SetStartTime(self, msg):
+        print("Return home node got start marker!")
+        print("Return home node got start marker!")
+        print("Return home node got start marker!")
+        print("Return home node got start marker!")
+        print("Return home node got start marker!")
         if self.endTime == -1:
             self.endTime = rospy.get_time() + self.duration
     

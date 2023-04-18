@@ -42,7 +42,7 @@ class Follower:
         rospy.init_node('follower')
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
         rospy.Subscriber('/scan', LaserScan, self.process_scan)
-        rospy.Subscriber('/odom', Odometry, self.process_odom)
+        # rospy.Subscriber('/odom', Odometry, self.process_odom)
         rospy.Subscriber('/returnHome', Int32, self.process_stop)
         rospy.Subscriber('/startMarker', Int32, self.process_start)
         print("setup done")
@@ -59,6 +59,7 @@ class Follower:
 
 
     def process_scan(self, msg):
+        print("message")
         num_scans = len(msg.ranges)
         scans_per_region = num_scans // 8
         ranges = [(index, r) for index, r in enumerate(msg.ranges)]
@@ -66,7 +67,7 @@ class Follower:
             "front": ranges[0 : scans_per_region - 1] + ranges[scans_per_region * 7 : -1],
             "left": ranges[scans_per_region: scans_per_region * 3 - 1],
             "back": ranges[scans_per_region * 3 : scans_per_region * 5 - 1],
-            "right": ranges[scans_per_region * 5 : scans_per_region * 7 - 1]
+            "right": ranges[scans_per_region * 5 : scans_per_region * 6 - 1]
         }
         self.direct_right_range = msg.ranges[len(msg.ranges)//4]
         self.right_range_diff = self.prev_direct_right - self.direct_right_range
@@ -113,16 +114,19 @@ class Follower:
     
 
     def start(self, closestRight):
-        if closestRight < self.threshold_max:
+        if closestRight < self.threshold_min:
             self.go_straight()
+            print("FOUND WALL")
+            self.bot_state == Bot_state.FOUND_WALL
         else:
             self.right_turn_90()
             self.go_straight()
-        print("FIRST WALL")
-        self.bot_state = Bot_state.FIRST_WALL
+            print("FIRST WALL")
+            self.bot_state = Bot_state.FIRST_WALL
 
     def first_wall(self, closestFront):
-        if closestFront < self.threshold_min:
+        print(closestFront)
+        if closestFront < self.threshold_max:
             self.turn_left()
             print("FOUND WALL")
             self.bot_state = Bot_state.FOUND_WALL
@@ -153,29 +157,6 @@ class Follower:
     def do_nothing(self):
         print("doing nothing")
 
-    # def laser_target_vector(self, index, dist):
-    #     dist_angle = self.angle_min + index * self.increment
-    #     x = dist * cos(dist_angle)
-    #     y = dist * sin(dist_angle)
-
-    #     return (x, y)
-
-    # def face_wall(self, index, dist):
-    #     target_x, target_y = self.laser_target_vector(index, dist)
-    #     target_heading = atan2(target_y - self.position.y, target_x - self.position.x)
-
-    #     heading_diff = target_heading - self.current_heading_radians
-
-    #     print("turning to face wall")
-    #     while heading_diff > 0.1:
-    #         self.make_move(0, min(0.5, max(-0.5, heading_diff)))
-
-    #     self.make_move(0, 0)
-    #     print("facing wall")
-
-    # def move_base_to_wall():
-    #     pass
-
     
     def back_to_wall(self):
         print("back to wall")
@@ -189,7 +170,7 @@ class Follower:
         duration = rospy.Duration.from_sec(3.0)  # seconds
         start_time = rospy.Time.now()
         while (rospy.Time.now() - start_time) < duration:
-            self.make_move(0, 0.5)
+            self.make_move(0, -0.5)
             rospy.sleep(0.1)
 
         self.make_move(0,0)

@@ -16,22 +16,22 @@ class WallFollower:
 
         rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
 
-        self.ranges = []
+        self.laser_scan_msg = None
         self.fixed_distance = 0.1  # Fixed distance to follow the wall
 
         self.wall_follower()
 
     def laser_scan_callback(self, msg):
-        self.ranges = msg.ranges
+        self.laser_scan_msg = msg
 
     def wall_follower(self):
         while not rospy.is_shutdown():
-            if self.ranges:
+            if self.laser_scan_msg:
                 # Find the closest point on the left side of the robot
-                left_ranges = self.ranges[0:180]  
+                left_ranges = self.laser_scan_msg.ranges[0:180]  
                 min_dist = min(left_ranges)
                 min_dist_index = left_ranges.index(min_dist)
-                angle = min_dist_index * 0.349066  # Convert to radians
+                angle = self.laser_scan_msg.angle_min + min_dist_index * self.laser_scan_msg.angle_increment
 
                 # Calculate the goal position in the base_link frame
                 goal_x = (min_dist + self.fixed_distance) * math.cos(angle)
@@ -50,7 +50,8 @@ class WallFollower:
         goal.target_pose.pose.position.x = goal_x
         goal.target_pose.pose.position.y = goal_y
 
-        quaternion = quaternion_from_euler(0, 0, angle)
+        rotation_angle = 0.5 * angle
+        quaternion = quaternion_from_euler(0, 0, rotation_angle)
         goal.target_pose.pose.orientation.x = quaternion[0]
         goal.target_pose.pose.orientation.y = quaternion[1]
         goal.target_pose.pose.orientation.z = quaternion[2]
