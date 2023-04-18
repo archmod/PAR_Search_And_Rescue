@@ -95,14 +95,17 @@ class Follower:
     def start(self, closestRight):
         if closestRight < self.threshold_min:
             self.go_straight()
+            print("FOUND WALL")
+            self.bot_state == Bot_state.FOUND_WALL
         else:
             self.right_turn_90()
             self.go_straight()
-        print("FIRST WALL")
-        self.bot_state = Bot_state.FIRST_WALL
+            print("FIRST WALL")
+            self.bot_state = Bot_state.FIRST_WALL
 
     def first_wall(self, closestFront):
-        if closestFront < self.threshold_min:
+        print(closestFront)
+        if closestFront < self.threshold_max:
             self.turn_left()
             print("FOUND WALL")
             self.bot_state = Bot_state.FOUND_WALL
@@ -132,29 +135,6 @@ class Follower:
 
     def do_nothing(self):
         print("doing nothing")
-
-    # def laser_target_vector(self, index, dist):
-    #     dist_angle = self.angle_min + index * self.increment
-    #     x = dist * cos(dist_angle)
-    #     y = dist * sin(dist_angle)
-
-    #     return (x, y)
-
-    # def face_wall(self, index, dist):
-    #     target_x, target_y = self.laser_target_vector(index, dist)
-    #     target_heading = atan2(target_y - self.position.y, target_x - self.position.x)
-
-    #     heading_diff = target_heading - self.current_heading_radians
-
-    #     print("turning to face wall")
-    #     while heading_diff > 0.1:
-    #         self.make_move(0, min(0.5, max(-0.5, heading_diff)))
-
-    #     self.make_move(0, 0)
-    #     print("facing wall")
-
-    # def move_base_to_wall():
-    #     pass
 
     
     def back_to_wall(self):
