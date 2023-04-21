@@ -47,8 +47,6 @@ class HazardDetection:
         rospy.Subscriber('/scan', LaserScan, self.lidar_scan_callback)
         self.fixed_marker_pub = rospy.Publisher('/fixed_marker', Marker, queue_size=1)
 
-        self.mX = 0
-        self.mY = 0
         self.published = False
         rospy.spin()
 

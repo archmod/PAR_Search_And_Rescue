@@ -32,7 +32,8 @@ class ReturnHomeNode:
             else:
                 self.returnHomePublisher.publish(0)
             rospy.sleep(1)
-    
+        
+    # Returns the robot home and is called after the timer has expired
     def ReturnHome(self):
         if self.homePose:
             goal = MoveBaseGoal()
@@ -46,12 +47,13 @@ class ReturnHomeNode:
         else:
             print("Home pose not set, cannot return home.")
         
-    
+    # Sets the start time upon receiving a message
     def SetStartTime(self, msg):
         print("Return home node got start marker!")
         if self.endTime == -1:
             self.endTime = rospy.get_time() + self.duration
-    
+
+    # Sets the home pose upon receiving a message to the '/startMarker' topic
     def SetHomePose(self, marker):
         if self.homePose is None:
             self.homePose = marker.pose

@@ -13,6 +13,7 @@ class PathNode:
         self.start_position_pub = rospy.Publisher('/start_position', Marker, queue_size=1)
         self.publish_start_marker()
 
+    # runs indefinitely, this allows nodes to collect the starting position through the marker it publishes
     def publish_start_marker(self):
         while not rospy.is_shutdown():
             try:

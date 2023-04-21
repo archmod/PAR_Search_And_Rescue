@@ -1,5 +1,4 @@
 import math
-from matplotlib import mathtext
 import rospy
 import tf2_ros
 from geometry_msgs.msg import PoseStamped
@@ -22,7 +21,7 @@ class PathRecorderNode:
         self.record_path()
 
     def record_path(self):
-        rate = rospy.Rate(1)  # Set the rate to 1 Hz
+        rate = rospy.Rate(1)  # Set the rate to 1Hz
 
         while not rospy.is_shutdown():
             try:
@@ -47,7 +46,6 @@ class PathRecorderNode:
                 #     rospy.loginfo("Total distance travelled: %f", self.total_distance)
 
                 self.prev_pose = pose_stamped
-
                 # Publish the path
                 self.path_pub.publish(self.path)
 
