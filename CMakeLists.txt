@@ -164,17 +164,17 @@ include_directories(
 # -- Needed so that our python scripts can be found
 # -- Add All Python Scripts Below
 catkin_install_python(PROGRAMS
-  scripts/follower.py
-  scripts/follower2.py
-  scripts/recognise.py
+  scripts/other/follower.py
+  scripts/other/follower2.py
+  scripts/other/recognise.py
   scripts/recognise_node.py
   scripts/path_node.py
-  scripts/followertest.py
+  scripts/other/followertest.py
   scripts/path_recorder_node.py
-  scripts/frontiergen.py
-  scripts/frontierexplore.py
+  scripts/other/frontiergen.py
+  scripts/other/frontierexplore.py
   scripts/follower3.py
-  scripts/wallfollow_node.py
+  scripts/other/wallfollow_node.py
   scripts/return_home_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
