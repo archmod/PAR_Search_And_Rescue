@@ -49,10 +49,6 @@ class ReturnHomeNode:
     
     def SetStartTime(self, msg):
         print("Return home node got start marker!")
-        print("Return home node got start marker!")
-        print("Return home node got start marker!")
-        print("Return home node got start marker!")
-        print("Return home node got start marker!")
         if self.endTime == -1:
             self.endTime = rospy.get_time() + self.duration
     
