@@ -31,7 +31,6 @@ CONFIDENCE_THRESHOLD = 0.5
 
 class HazardDetection:
     def __init__(self):
-        print("IM RUNNING BOSS")
         rospy.init_node('hazard_detection_node', anonymous=True)
 
         self.tf_buffer = tf2_ros.Buffer()
@@ -39,7 +38,6 @@ class HazardDetection:
 
         rospy.Subscriber('/objectsStamped', ObjectsStamped, self.callback)
 
-        # self.hazard_marker_pub = rospy.Publisher('/hazards', Marker, queue_size=10)
         self.hazard_marker_pub = rospy.Publisher('/hazards_array', MarkerArray, queue_size=10)
         self.hazard_marker_pub_single = rospy.Publisher('/hazards', Marker, queue_size=10)
         self.hazard_markers = []
@@ -57,8 +55,6 @@ class HazardDetection:
     def publish_data(self):
         while not rospy.is_shutdown():
             if self.published:
-                print("printing hazard markers")
-                # self.publish_fixed_marker(self.mX, self.mY)
                 self.hazard_marker_pub.publish(self.hazard_markers)
                 print(self.hazard_markers)
     
@@ -84,8 +80,6 @@ class HazardDetection:
             distance = math.sqrt((marker.pose.position.x - x)**2 + (marker.pose.position.y - y)**2)
             if distance < threshold and marker.id == hazard_id:
                 return True
-        # Janky way of getting it to print to the hazard topic per the spec
-
         return False
 
         
@@ -98,7 +92,6 @@ class HazardDetection:
             object_id = int(msg.objects.data[i])
             confidence = msg.objects.data[i + 1]
             image_x = msg.objects.data[i + 7]
-            image_y = msg.objects.data[i + 6]
 
             recognized_image = Recognition_Image(object_id)
             print(f"Recognized {recognized_image.name} (ID: {object_id}) with Confidence: {confidence}")
@@ -138,7 +131,6 @@ class HazardDetection:
                         marker_array.markers = self.hazard_markers
                         self.hazard_marker_pub.publish(marker_array)
                         self.hazard_marker_pub_single.publish(hazard_marker)
-                        # self.publish_fixed_marker(map_x, map_y)
                         rospy.sleep(0.3)
 
     
@@ -166,32 +158,6 @@ class HazardDetection:
         marker.color.a = 1.0
         marker.id = marker_id
         return marker
-
-    def publish_fixed_marker(self,x, y):
-        fixed_marker = Marker()
-        fixed_marker.header.frame_id = "map"
-        fixed_marker.type = Marker.CUBE
-        fixed_marker.action = Marker.ADD
-        fixed_marker.id = 0
-
-        fixed_marker.pose.position.x = x
-        fixed_marker.pose.position.y = y
-        fixed_marker.pose.position.z = 0
-        fixed_marker.pose.orientation.x = 0.0
-        fixed_marker.pose.orientation.y = 0.0
-        fixed_marker.pose.orientation.z = 0.0
-        fixed_marker.pose.orientation.w = 1.0
-
-        fixed_marker.scale.x = 0.3
-        fixed_marker.scale.y = 0.3
-        fixed_marker.scale.z = 0.3
-
-        fixed_marker.color.r = 1.0
-        fixed_marker.color.g = 1.0
-        fixed_marker.color.b = 0.0
-        fixed_marker.color.a = 1.0
-        self.fixed_marker_pub.publish(fixed_marker)
-
 
 if __name__ == '__main__':
     try:
